@@ -1,2 +1,9 @@
+#include "../include/Log.h"
 #include <cstdlib>
-int main() { return EXIT_SUCCESS; }
+#include <iostream>
+
+int main() {
+  Log lg(1, 1);
+  std::cout << lg.GetLogString();
+  return EXIT_SUCCESS;
+}
