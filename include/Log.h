@@ -1,19 +1,20 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <chrono>
 #include <ctime>
 #include <string>
+
 class Log {
-  size_t bikeId;
-  size_t userId;
-  time_t timestamp;
+  protected:
+    size_t bikeId;
+    size_t userId;
+    time_t timestamp;
 
 public:
-  Log(size_t bikeId, size_t userId)
-      : bikeId(bikeId), userId(userId), timestamp(std::time(nullptr)) {}
+  Log(size_t bikeId, size_t userId) : bikeId(bikeId), userId(userId), timestamp(std::time(nullptr)) {}
+  virtual ~Log() = default; // zeby usunac rowniez obiekty dziedziczace na zapas
 
-  std::string GetLogString();
+  virtual std::string GetLogString(); // chyba virtual ma najwiecej sensu
   void SaveToFile(std::string);
 };
 
