@@ -2,9 +2,12 @@
 #define DATABASE_H
 
 #include <algorithm>
+#include <boost/filesystem/operations.hpp>
 #include <cstdio>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <iosfwd>
 #include <iostream>
 #include <ostream>
 #include <sstream>
@@ -15,13 +18,16 @@
 template <typename T> class Database {
   std::vector<T> localData;
   std::fstream fileData;
+  std::string filepath;
 
   bool IsIdTaken(size_t id) {
+
     try {
       FindInFileById(id);
     } catch (const NoRecordsFound &e) {
       return false;
     }
+
     return true;
   }
 
@@ -111,13 +117,19 @@ template <typename T> class Database {
 public:
   ~Database() { fileData.close(); }
 
-  Database(std::string path)
-      : fileData(path, std::ios_base::in | std::ios_base::out) {
+  Database(std::string path) : filepath(path) { setupFile(); }
+
+  void setupFile() {
+
+    if (fileData.is_open())
+      fileData.close();
+
+    fileData = std::fstream(filepath, std::ios_base::in | std::ios_base::out);
 
     if (!fileData) {
-      std::ofstream create(path);
+      std::ofstream create(filepath);
       create.close();
-      fileData = std::fstream(path, std::ios_base::in | std::ios_base::out);
+      fileData = std::fstream(filepath, std::ios_base::in | std::ios_base::out);
     }
 
     if (!fileData.is_open())
@@ -173,14 +185,97 @@ public:
     }
   }
 
-  void DeleteById(); // delete
+  void DeleteById(size_t id) { // delete
 
+    std::ostringstream ossPath;
+    ossPath << "./data/tmp-" << std::time(nullptr) << "-" << std::rand()
+            << ".txt";
+
+    std::string rndPath = ossPath.str();
+
+    if (boost::filesystem::exists(rndPath))
+      if (std::remove(rndPath.c_str()) != 0)
+        throw std::ios_base::failure("Error fallback cleanup failed");
+
+    std::fstream tmpFile(rndPath, std::fstream::app);
+
+    if (!tmpFile.is_open()) {
+      if (std::remove(rndPath.c_str()) != 0)
+        throw std::ios_base::failure("Error fallback cleanup failed");
+
+      throw std::ios_base::failure("Failed to create a tmp file");
+    }
+
+    try {
+      FindInFileById(id);
+
+      fileData.clear();
+      std::streampos lineToDel = fileData.tellg();
+
+      if (lineToDel == std::fstream::pos_type(-1))
+        throw NoRecordsFound();
+
+      std::streampos curLinePos = 0;
+      std::string line;
+
+      fileData.seekg(0);
+
+      while (((curLinePos = fileData.tellg()) | true) &&
+             getline(fileData, line)) {
+
+        if (lineToDel == curLinePos)
+          continue;
+
+        tmpFile << line << '\n';
+      }
+
+    } catch (const NoRecordsFound &e) {
+      std::cerr << "Cannot delete non-existent object" << std::endl;
+
+      if (std::remove(rndPath.c_str()) != 0)
+        throw std::ios_base::failure("Error fallback cleanup failed");
+
+      throw;
+
+    } catch (const std::ios_base::failure &e) {
+      std::cerr << e.what() << std::endl;
+
+      if (!fileData.eof()) {
+        if (std::remove(rndPath.c_str()) != 0)
+          throw std::ios_base::failure("Error fallback cleanup failed");
+
+        throw;
+      }
+    }
+
+    try {
+
+      tmpFile.close();
+      fileData.close();
+
+      if (std::remove(filepath.c_str()) != 0)
+        throw std::ios_base::failure("Failed to remove old db file");
+
+      if (std::rename(rndPath.c_str(), filepath.c_str()) != 0)
+        throw std::ios_base::failure("Failed to move tmp file");
+
+      setupFile();
+
+    } catch (const std::ios_base::failure &e) {
+      std::cerr << e.what() << std::endl;
+
+      if (std::remove(rndPath.c_str()) != 0)
+        throw std::ios_base::failure("Error fallback cleanup failed");
+
+      throw;
+    }
+  }
   // Synchronize data with filedata
   // (in case of a conflict, file data is always right)
   void SyncData() {}
 
-  // Loads a record into localData from the associated by Id
-  T &LoadRecord(size_t id);
+  // Loads a record into localData from the associated file by Id
+  T &LoadRecord(size_t id) {}
 
   // Unloads from localData by Id
   void UnloadRecord(size_t id);

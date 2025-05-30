@@ -14,6 +14,7 @@ int main() {
   db.Create(lg);
   db.Create(lg1);
   db.GetById(2);
+  db.DeleteById(4);
 
   return EXIT_SUCCESS;
 }
