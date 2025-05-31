@@ -1,10 +1,9 @@
 #include "../include/Log.h"
+#include "DatabaseEntry.h"
 #include <cctype>
 #include <istream>
 #include <sstream>
 #include <stdexcept>
-
-size_t Log::idCounter = 0;
 
 std::string Log::GetLogString() {
   std::ostringstream iss;
@@ -15,26 +14,19 @@ std::string Log::GetLogString() {
   return iss.str();
 }
 
-void Log::SaveToFile(std::string path) {}
-
-std::ostream &operator<<(std::ostream &os, const Log &lg) {
-  return os << lg.id << ";" << lg.bikeId << ";" << lg.userId << ";"
-            << lg.timestamp;
-}
-
-std::istream &operator>>(std::istream &iss, Log &lg) {
+std::istream &Log::ParseObjectFromStream(std::istream &iss) {
   char separator;
 
-  if (!(iss >> lg.id >> separator) || separator != ';')
+  if (!(iss >> id >> separator) || separator != ';')
     throw std::runtime_error("Failed to parse id from string");
 
-  if (!(iss >> lg.bikeId >> separator) || separator != ';')
+  if (!(iss >> bikeId >> separator) || separator != ';')
     throw std::runtime_error("Failed to parse bikeId from string");
 
-  if (!(iss >> lg.userId >> separator) || separator != ';')
+  if (!(iss >> userId >> separator) || separator != ';')
     throw std::runtime_error("Failed to parse userId from string");
 
-  if (!(iss >> lg.timestamp))
+  if (!(iss >> timestamp))
     throw std::runtime_error("Failed to parse timestamp from string");
 
   iss >> std::ws;
@@ -42,7 +34,15 @@ std::istream &operator>>(std::istream &iss, Log &lg) {
   return iss;
 }
 
-bool operator==(const Log &a, const Log &b) {
-  return ((a.bikeId == b.bikeId) && (a.userId == b.userId) &&
-          (a.timestamp == b.timestamp) && (a.id == b.id));
+std::ostream &Log::GetDatabaseEntryToStream(std::ostream &os) {
+  os << id << ";" << bikeId << ";" << userId << ";" << timestamp;
+  return os;
+}
+
+bool Log::isEqual(const DatabaseEntry<Log> &a) const {
+  const Log *otherLog = dynamic_cast<const Log *>(&a);
+  if (!otherLog)
+    return false;
+  return ((otherLog->bikeId == bikeId) && (otherLog->userId == userId) &&
+          (otherLog->timestamp == timestamp) && (otherLog->id == id));
 }

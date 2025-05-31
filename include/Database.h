@@ -1,6 +1,7 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include "DatabaseEntry.h"
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <cstdio>
@@ -16,6 +17,10 @@
 #include <vector>
 
 template <typename T> class Database {
+
+  static_assert(std::is_base_of<DatabaseEntry<T>, T>::value,
+                "Database can only store types derived from DatabaseEntry<T>");
+
   std::vector<T> localData;
   std::fstream fileData;
   std::string filepath;
@@ -54,11 +59,8 @@ template <typename T> class Database {
         maxId = curId > maxId ? curId : maxId;
       }
     } catch (const std::ios_base::failure &e) {
-
-      if (fileData.eof())
-        return maxId;
-
-      throw;
+      if (!fileData.eof())
+        throw;
     }
     return maxId; // It's here just to avoid warnings
   }
@@ -101,7 +103,6 @@ template <typename T> class Database {
       std::cerr << std::endl << e.code() << std::endl;
       throw;
     } catch (const InvalidRecordFormat &e) {
-
       std::cerr << e.what() << std::endl; // TODO: add invalid row deletion
     }
   }
