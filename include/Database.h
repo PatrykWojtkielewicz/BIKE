@@ -62,7 +62,7 @@ template <typename T> class Database {
       if (!fileData.eof())
         throw;
     }
-    return maxId; // It's here just to avoid warnings
+    return maxId;
   }
 
   void FindInFileById(size_t id) {
