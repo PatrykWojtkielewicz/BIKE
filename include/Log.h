@@ -5,10 +5,10 @@
 #include <string>
 
 class Log {
-  protected:
-    size_t bikeId;
-    size_t userId;
-    time_t timestamp;
+protected:
+  size_t bikeId;
+  size_t userId;
+  time_t timestamp;
 
 public:
   Log(size_t bikeId, size_t userId) : bikeId(bikeId), userId(userId), timestamp(std::time(nullptr)) {}
