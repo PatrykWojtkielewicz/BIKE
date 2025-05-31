@@ -10,8 +10,8 @@ class Log {
   time_t timestamp;
 
 public:
-  static size_t idCounter;
-  size_t id;
+  static size_t idCounter; // Move to a virtual class
+  size_t id;               // Move to a virtual class
 
   Log() : Log(0, 0) {}
   Log(size_t bikeId, size_t userId)
@@ -20,9 +20,10 @@ public:
   }
 
   std::string GetLogString();
-  void SaveToFile(std::string);
+  void SaveToFile(std::string); // Not sure why this thing is here
   friend std::ostream &operator<<(std::ostream &, const Log &);
-  friend std::istream &operator>>(std::istream &os, Log &lg);
+  friend std::istream &operator>>(std::istream &, Log &);
+  friend bool operator==(const Log &, const Log &); // Move to a virtual class
 };
 
 #endif

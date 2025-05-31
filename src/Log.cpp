@@ -41,3 +41,8 @@ std::istream &operator>>(std::istream &iss, Log &lg) {
 
   return iss;
 }
+
+bool operator==(const Log &a, const Log &b) {
+  return ((a.bikeId == b.bikeId) && (a.userId == b.userId) &&
+          (a.timestamp == b.timestamp) && (a.id == b.id));
+}

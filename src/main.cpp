@@ -11,8 +11,10 @@ int main() {
 
   db.Create(lg);
   db.Create(lg1);
+  Log lgsub(3, 3);
+  db.SetById(2, lgsub);
   // db.GetById(2);
-  db.DeleteById(4);
+  // db.DeleteById(4);
 
   return EXIT_SUCCESS;
 }

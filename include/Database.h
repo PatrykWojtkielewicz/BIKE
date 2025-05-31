@@ -106,12 +106,17 @@ template <typename T> class Database {
     }
   }
 
-  void DecodeCurrLine(T &obj) {
-    std::stringstream ss;
+  time_t DecodeCurrLine(T &obj) {
+    std::stringstream ss, tstampss;
     std::string line;
+    time_t timestamp;
+
     getline(fileData, line);
     ss << line.substr(0, line.find_last_of(";"));
+    tstampss << line.substr(line.find_last_of(";"), line.length() - 1);
+    tstampss >> timestamp;
     ss >> obj;
+    return timestamp;
   }
 
 public:
@@ -157,7 +162,19 @@ public:
     return obj;
   }
 
-  void SetById(size_t id, T obj) { // update
+  void SetById(size_t id, T &obj) { // update
+
+    FindInFileById(id);
+
+    T old;
+    DecodeCurrLine(old);
+
+    obj.id = id;
+    if (obj == old)
+      return;
+
+    DeleteById(id);
+    Create(obj);
   }
 
   void Create(T obj) { // create
@@ -272,6 +289,8 @@ public:
       throw;
     }
   }
+
+  // tbh it's not that important, it just works rn without those methods
   // Synchronize data with filedata
   // (in case of a conflict, file data is always right)
   void SyncData() {}
