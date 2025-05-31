@@ -142,7 +142,7 @@ public:
 
   // Set of basic crud operations
 
-  T GetById(size_t id) { // Read
+  T GetById(size_t id) { // read
 
     auto objIter = std::find_if(localData.begin(), localData.end(),
                                 [&](const T &obj) { return obj.id == id; });
@@ -157,7 +157,8 @@ public:
     return obj;
   }
 
-  void SetById(size_t id, T obj); // update
+  void SetById(size_t id, T obj) { // update
+  }
 
   void Create(T obj) { // create
 
@@ -168,7 +169,6 @@ public:
 
       std::ostringstream oss;
 
-      // TODO: think about adding human-readable timestamps
       oss << obj << ";" << std::time(nullptr) << "\n";
       localData.push_back(obj);
 
@@ -186,6 +186,9 @@ public:
   }
 
   void DeleteById(size_t id) { // delete
+
+    std::remove_if(localData.begin(), localData.end(),
+                   [&](T obj) { return obj.id == id; });
 
     std::ostringstream ossPath;
     ossPath << "./data/tmp-" << std::time(nullptr) << "-" << std::rand()
@@ -238,9 +241,8 @@ public:
       throw;
 
     } catch (const std::ios_base::failure &e) {
-      std::cerr << e.what() << std::endl;
-
       if (!fileData.eof()) {
+        std::cerr << e.what() << std::endl;
         if (std::remove(rndPath.c_str()) != 0)
           throw std::ios_base::failure("Error fallback cleanup failed");
 
