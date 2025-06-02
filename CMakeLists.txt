@@ -16,4 +16,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -MMD -MP")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
 add_executable(BIKE src/main.cpp src/Log.cpp src/RentLog.cpp src/ReturnLog.cpp src/Station.cpp)
+
+find_package(Boost REQUIRED COMPONENTS filesystem system)
+
+target_link_libraries(BIKE
+    PRIVATE
+        Boost::filesystem
+        Boost::system
+)
