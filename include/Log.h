@@ -23,9 +23,7 @@ public:
   void SaveToFile(std::string);
 
   bool isEqual(const DatabaseEntry<Log> &) const override;
-
   std::ostream &GetDatabaseEntryToStream(std::ostream &) override;
-
   std::istream &ParseObjectFromStream(std::istream &) override;
 };
 

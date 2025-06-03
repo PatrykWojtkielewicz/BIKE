@@ -5,7 +5,7 @@
 #include <ostream>
 
 template <typename Derived> class DatabaseEntry {
-public:
+public: 
   size_t id;
   static size_t idCounter;
 

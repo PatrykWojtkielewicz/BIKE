@@ -1,0 +1,7 @@
+# ninja log v5
+2	232	1748928154275356781	CMakeFiles/BIKE.dir/src/Station.cpp.o	e2179f38cdd78bb7
+2	262	1748928154305357437	CMakeFiles/BIKE.dir/src/RentLog.cpp.o	c70ac656ba1f990b
+2	264	1748928154305357437	CMakeFiles/BIKE.dir/src/ReturnLog.cpp.o	4a5ed0b071a0ff6b
+1	385	1748928154428360128	CMakeFiles/BIKE.dir/src/Log.cpp.o	b606b9f579e2a87c
+1	886	1748928154929371088	CMakeFiles/BIKE.dir/src/main.cpp.o	6d5f4a89679e82cb
+886	953	1748928154995372531	/home/pieczarki/BIKE/bin/BIKE	936f1ba2d2a55dd6

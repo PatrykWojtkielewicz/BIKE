@@ -1,6 +1,7 @@
 #include "../include/Log.h"
 #include "../include/RentLog.h"
 #include "../include/ReturnLog.h"
+#include "../include/State.h"
 #include "Database.h"
 #include <cstdlib>
 
@@ -14,6 +15,9 @@ int main() {
   db.Create(lg1);
   Log lgsub(3, 3);
   db.SetById(2, lgsub);
+
+  State state;
+  state.GetBikeCurrentOwnerId(1);
 
   return EXIT_SUCCESS;
 }
