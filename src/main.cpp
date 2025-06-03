@@ -12,7 +12,12 @@ int main() {
 
   Bike bk(1);
 
+  User newUser("Karol", "Bobryk", "Made-up@email");
+
   state.AddToDatabase(bk);
+  state.AddToDatabase(newUser);
+
+  state.RentBike(bk.id, newUser.id);
 
   Bike bkret = state.GetObjectById<Bike>(2);
 

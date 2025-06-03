@@ -1,16 +1,17 @@
 #include "../include/Bike.h"
 
 void Bike::RentBike(size_t userId) {
-  if(!isTaken) {
+  if (!isTaken) {
     isTaken = true;
     currentOwnerId = userId;
-    currentStationId = SIZE_MAX;
+    currentStationId = 0;
     // TODO: przypisanie rowera uzytkownikowi
   }
 }
 
 std::ostream &Bike::GetDatabaseEntryToStream(std::ostream &os) {
-  os << id << ";" << currentStationId << ";" << currentOwnerId << ";" << isTaken;
+  os << id << ";" << currentStationId << ";" << currentOwnerId << ";"
+     << isTaken;
   return os;
 }
 
@@ -32,14 +33,13 @@ std::istream &Bike::ParseObjectFromStream(std::istream &is) {
   is >> std::ws;
   return is;
 }
-  
+
 bool Bike::isEqual(const DatabaseEntry<Bike> &other) const {
-  const Bike* bikePtr = dynamic_cast<const Bike*>(&other);
+  const Bike *bikePtr = dynamic_cast<const Bike *>(&other);
   if (!bikePtr) {
-    return false; 
+    return false;
   }
-  return id == bikePtr->id &&
-         currentStationId == bikePtr->currentStationId &&
+  return id == bikePtr->id && currentStationId == bikePtr->currentStationId &&
          currentOwnerId == bikePtr->currentOwnerId &&
          isTaken == bikePtr->isTaken;
 }

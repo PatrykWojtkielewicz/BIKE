@@ -1,4 +1,6 @@
 #include "State.h"
+#include "RentLog.h"
+#include <stdexcept>
 std::string State::GetUserEmail(size_t id) {
   try {
     User user = UserDB.GetById(id);
@@ -85,4 +87,38 @@ template <> Log State::GetObjectById<Log>(size_t id) {
 
 template <> Bike State::GetObjectById<Bike>(size_t id) {
   return BikeDB.GetById(id);
+}
+
+void State::RentBike(size_t bikeId, size_t userId) {
+  try {
+    Bike bike = BikeDB.GetById(bikeId);
+    User usr = UserDB.GetById(userId);
+
+    if (bike.IsTaken()) {
+      throw std::runtime_error("Cannot rent a taken bike");
+    }
+
+    if (usr.GetBikeRentedId() != 0) {
+      throw std::runtime_error("Cannot rent more than one bike at a time");
+    }
+
+    bike.SetIsTaken(true);
+    bike.SetCurrentOwnerId(userId);
+
+    usr.SetBikeRentedId(bikeId);
+
+    RentLog rtLog(bikeId, userId);
+
+    UserDB.SetById(userId, usr);
+    BikeDB.SetById(bikeId, bike);
+    LogDB.Create(rtLog);
+
+    // TODO: add logging
+  } catch (const Database<Bike>::NoRecordsFound &e) {
+    std::cerr << e.what() << std::endl;
+    throw;
+  } catch (const Database<User>::NoRecordsFound &e) {
+    std::cerr << e.what() << std::endl;
+    throw;
+  }
 }

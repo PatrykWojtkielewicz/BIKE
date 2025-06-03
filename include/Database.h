@@ -25,17 +25,6 @@ template <typename T> class Database {
   std::fstream fileData;
   std::string filepath;
 
-  bool IsIdTaken(size_t id) {
-
-    try {
-      FindInFileById(id);
-    } catch (const NoRecordsFound &e) {
-      return false;
-    }
-
-    return true;
-  }
-
   size_t GetBiggestId() {
 
     size_t maxId = 0;
@@ -289,6 +278,17 @@ public:
 
       throw;
     }
+  }
+
+  bool IsIdTaken(size_t id) {
+
+    try {
+      FindInFileById(id);
+    } catch (const NoRecordsFound &e) {
+      return false;
+    }
+
+    return true;
   }
 
   // tbh it's not that important, it just works rn without those methods

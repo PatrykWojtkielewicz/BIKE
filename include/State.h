@@ -4,16 +4,19 @@
 #include "Bike.h"
 #include "Database.h"
 #include "Log.h"
+#include "Station.h"
 #include "User.h"
 
 class State {
   Database<Bike> BikeDB;
   Database<User> UserDB;
   Database<Log> LogDB;
+  Station Stations[7];
 
 public:
   State(std::string logDBPath, std::string userDBPath, std::string bikeDBPath)
       : LogDB(logDBPath), UserDB(userDBPath), BikeDB(bikeDBPath){};
+
   std::string GetUserEmail(size_t);
   std::string GetUserName(size_t);
   std::string GetUserSurname(size_t);
@@ -27,6 +30,9 @@ public:
   void AddToDatabase(Bike &);
 
   template <typename T> T GetObjectById(size_t);
+
+  void RentBike(size_t, size_t);
+  void ReturnBike(size_t, size_t);
 };
 
 template <> User State::GetObjectById<User>(size_t);
