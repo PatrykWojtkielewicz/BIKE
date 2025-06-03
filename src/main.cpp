@@ -12,16 +12,14 @@ int main() {
 
   Bike bk(1);
 
-  User newUser("Karol", "Bobryk", "Made-up@email");
+  User newUser("Partyk", "Wojtulewicz", "Made-up@email.com");
 
-  state.AddToDatabase(bk);
   state.AddToDatabase(newUser);
+  state.AddToDatabase(bk);
 
   state.RentBike(bk.id, newUser.id);
 
-  Bike bkret = state.GetObjectById<Bike>(2);
-
-  std::cout << bkret;
+  state.ReturnBike(bk.id, 0);
 
   return EXIT_SUCCESS;
 }

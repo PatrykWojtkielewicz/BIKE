@@ -1,17 +1,15 @@
 #include "../include/Bike.h"
-
-void Bike::RentBike(size_t userId) {
-  if (!isTaken) {
-    isTaken = true;
-    currentOwnerId = userId;
-    currentStationId = 0;
-    // TODO: przypisanie rowera uzytkownikowi
-  }
-}
+#include <ios>
+#include <iostream>
+#include <sstream>
 
 std::ostream &Bike::GetDatabaseEntryToStream(std::ostream &os) {
-  os << id << ";" << currentStationId << ";" << currentOwnerId << ";"
-     << isTaken;
+
+  std::ostringstream oss;
+  oss << id << ";" << currentStationId << ";" << currentOwnerId << ";"
+      << isTaken;
+  os << oss.str();
+
   return os;
 }
 

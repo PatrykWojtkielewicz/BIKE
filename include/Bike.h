@@ -11,11 +11,7 @@ class Bike : public DatabaseEntry<Bike> {
 
 public:
   Bike(size_t currentStationId = 0)
-      : currentStationId(currentStationId), currentOwnerId(0), isTaken(false) {
-  } // moze lepiej currentOwnerId dac = 0?
-
-  void RentBike(size_t userId);
-  void ReturnBike(size_t userId);
+      : currentStationId(currentStationId), currentOwnerId(0), isTaken(false) {}
 
   void SetCurrentOwnerId(size_t id) { currentOwnerId = id; }
   void SetCurrentStationId(size_t id) { currentStationId = id; }

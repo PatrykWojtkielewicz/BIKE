@@ -1,5 +1,6 @@
 #include "State.h"
 #include "RentLog.h"
+#include "ReturnLog.h"
 #include <stdexcept>
 std::string State::GetUserEmail(size_t id) {
   try {
@@ -91,6 +92,7 @@ template <> Bike State::GetObjectById<Bike>(size_t id) {
 
 void State::RentBike(size_t bikeId, size_t userId) {
   try {
+
     Bike bike = BikeDB.GetById(bikeId);
     User usr = UserDB.GetById(userId);
 
@@ -111,9 +113,40 @@ void State::RentBike(size_t bikeId, size_t userId) {
 
     UserDB.SetById(userId, usr);
     BikeDB.SetById(bikeId, bike);
+
     LogDB.Create(rtLog);
 
-    // TODO: add logging
+  } catch (const Database<Bike>::NoRecordsFound &e) {
+    std::cerr << e.what() << std::endl;
+    throw;
+  } catch (const Database<User>::NoRecordsFound &e) {
+    std::cerr << e.what() << std::endl;
+    throw;
+  }
+}
+
+void State::ReturnBike(size_t bikeId, size_t stationId) {
+  try {
+
+    Bike bike = BikeDB.GetById(bikeId);
+    size_t userId = bike.GetCurrentOwnerId();
+
+    User usr = UserDB.GetById(userId);
+
+    bike.SetIsTaken(false);
+    bike.SetCurrentOwnerId(0);
+    bike.SetCurrentStationId(0);
+
+    // TODO: add station logic
+
+    usr.SetBikeRentedId(0);
+    ReturnLog rtLog(bikeId, stationId);
+
+    UserDB.SetById(userId, usr);
+    BikeDB.SetById(bikeId, bike);
+
+    LogDB.Create(rtLog);
+
   } catch (const Database<Bike>::NoRecordsFound &e) {
     std::cerr << e.what() << std::endl;
     throw;

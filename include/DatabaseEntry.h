@@ -5,11 +5,13 @@
 #include <ostream>
 
 template <typename Derived> class DatabaseEntry {
-public: 
+public:
   size_t id;
   static size_t idCounter;
 
   DatabaseEntry() : id(++idCounter) {}
+
+  ~DatabaseEntry() = default;
 
   virtual std::ostream &GetDatabaseEntryToStream(std::ostream &) = 0;
 
