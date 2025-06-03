@@ -34,16 +34,16 @@ std::istream &Log::ParseObjectFromStream(std::istream &iss) {
   char separator;
 
   if (!(iss >> id >> separator) || separator != ';')
-    throw std::runtime_error("Failed to parse id from string");
+    throw std::runtime_error("failed to parse id from string");
 
   if (!(iss >> bikeId >> separator) || separator != ';')
-    throw std::runtime_error("Failed to parse bikeId from string");
+    throw std::runtime_error("failed to parse bikeid from string");
 
   if (!(iss >> userId >> separator) || separator != ';')
-    throw std::runtime_error("Failed to parse userId from string");
+    throw std::runtime_error("failed to parse userid from string");
 
   if (!(iss >> timestamp))
-    throw std::runtime_error("Failed to parse timestamp from string");
+    throw std::runtime_error("failed to parse timestamp from string");
 
   iss >> std::ws;
 

@@ -1,23 +1,22 @@
-#include "../include/Log.h"
-#include "../include/RentLog.h"
-#include "../include/ReturnLog.h"
 #include "../include/State.h"
-#include "Database.h"
+#include "Bike.h"
 #include <cstdlib>
 
+constexpr char logDBPath[] = "./data/logs.txt";
+constexpr char userDBPath[] = "./data/users.txt";
+constexpr char bikeDBPath[] = "./data/bikes.txt";
+
 int main() {
-  Database<Log> db("./data/db-test.txt");
 
-  Log lg(1, 1);
-  Log lg1(2, 2);
+  State state(logDBPath, userDBPath, bikeDBPath);
 
-  db.Create(lg);
-  db.Create(lg1);
-  Log lgsub(3, 3);
-  db.SetById(2, lgsub);
+  Bike bk(1);
 
-  State state;
-  state.GetBikeCurrentOwnerId(1);
+  state.AddToDatabase(bk);
+
+  Bike bkret = state.GetObjectById<Bike>(2);
+
+  std::cout << bkret;
 
   return EXIT_SUCCESS;
 }

@@ -1,8 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include "Database.h"
 #include "Bike.h"
+#include "Database.h"
 #include "Log.h"
 #include "User.h"
 
@@ -11,79 +11,26 @@ class State {
   Database<User> UserDB;
   Database<Log> LogDB;
 
-  public:
-    State() {};
+public:
+  State(std::string logDBPath, std::string userDBPath, std::string bikeDBPath)
+      : LogDB(logDBPath), UserDB(userDBPath), BikeDB(bikeDBPath){};
+  std::string GetUserEmail(size_t);
+  std::string GetUserName(size_t);
+  std::string GetUserSurname(size_t);
+  size_t GetUserBikeRented(size_t);
+  size_t GetBikeCurrentStationId(size_t);
+  bool GetBikeIsTaken(size_t);
+  size_t GetBikeCurrentOwnerId(size_t);
 
-    std::string GetUserEmail(size_t id) {
-      try {
-        User user = UserDB.GetById(id);
-        return user.GetEmail();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving user email: " << e.what() << std::endl;
-        return "";
-      }
-    }
+  void AddToDatabase(User &);
+  void AddToDatabase(Log &);
+  void AddToDatabase(Bike &);
 
-    std::string GetUserName(size_t id) {
-      try {
-        User user = UserDB.GetById(id);
-        return user.GetName();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving user name: " << e.what() << std::endl;
-        return "";
-      }
-    }
-
-    std::string GetUserSurname(size_t id) {
-      try {
-        User user = UserDB.GetById(id);
-        return user.GetSurname();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving user surname: " << e.what() << std::endl;
-        return "";
-      }
-    }
-
-    size_t GetUserBikeRented(size_t id) {
-      try {
-        User user = UserDB.GetById(id);
-        return user.GetBikeRentedId();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving user bike rented: " << e.what() << std::endl;
-        return SIZE_MAX;
-      }
-    }
-
-    size_t GetBikeCurrentStationId(size_t id) {
-      try {
-        Bike bike = BikeDB.GetById(id);
-        return bike.GetCurrentStationId();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving bike station: " << e.what() << std::endl;
-        return SIZE_MAX;
-      }
-    }
-
-    bool GetBikeIsTaken(size_t id) {
-      try {
-        Bike bike = BikeDB.GetById(id);
-        return bike.IsTaken();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving bike status: " << e.what() << std::endl;
-        return false;
-      }
-    }
-
-    size_t GetBikeCurrentOwnerId(size_t id) {
-      try {
-        Bike bike = BikeDB.GetById(id);
-        return bike.GetCurrentOwnerId();
-      } catch (const std::runtime_error &e) {
-        std::cerr << "Error retrieving bike owner: " << e.what() << std::endl;
-        return SIZE_MAX;
-      }
-    }
-    
+  template <typename T> T GetObjectById(size_t);
 };
+
+template <> User State::GetObjectById<User>(size_t);
+template <> Log State::GetObjectById<Log>(size_t);
+template <> Bike State::GetObjectById<Bike>(size_t);
 
 #endif
