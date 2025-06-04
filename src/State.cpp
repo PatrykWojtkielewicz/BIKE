@@ -72,6 +72,12 @@ size_t State::GetBikeCurrentOwnerId(size_t id) {
   }
 }
 
+Station State::GetStationById(size_t id) {
+  if (id >= stationsSize)
+    throw std::runtime_error("invalid station id");
+  return Stations[id];
+}
+
 void State::AddToDatabase(User &obj) { UserDB.Create(obj); }
 
 void State::AddToDatabase(Log &obj) { LogDB.Create(obj); }
@@ -155,4 +161,27 @@ void State::ReturnBike(size_t bikeId, size_t stationId) {
     std::cerr << e.what() << std::endl;
     throw;
   }
+}
+
+StationsEnum &operator++(StationsEnum &st) {
+  st = static_cast<StationsEnum>((static_cast<int>(st) + 1) % stationsSize);
+  return st;
+}
+
+StationsEnum &operator--(StationsEnum &st) {
+  st = static_cast<StationsEnum>((static_cast<int>(st) - 1 + stationsSize) %
+                                 stationsSize);
+  return st;
+}
+
+StationsEnum operator++(StationsEnum &st, int) {
+  StationsEnum old = st;
+  ++st;
+  return old;
+}
+
+StationsEnum operator--(StationsEnum &st, int) {
+  StationsEnum old = st;
+  --st;
+  return old;
 }

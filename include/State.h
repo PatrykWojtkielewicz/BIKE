@@ -8,9 +8,13 @@
 #include "User.h"
 #include <array>
 
-enum class StationsEnum { ST1, ST2, END };
+enum class StationsEnum { ST1, ST2, COUNT };
+constexpr size_t stationsSize = static_cast<size_t>(StationsEnum::COUNT);
 
-constexpr size_t stationsSize = static_cast<size_t>(StationsEnum::END);
+StationsEnum &operator++(StationsEnum &st);
+StationsEnum &operator--(StationsEnum &st);
+StationsEnum operator++(StationsEnum &st, int);
+StationsEnum operator--(StationsEnum &st, int);
 
 class State {
   Database<Bike> BikeDB;
@@ -29,6 +33,7 @@ public:
   size_t GetBikeCurrentStationId(size_t);
   bool GetBikeIsTaken(size_t);
   size_t GetBikeCurrentOwnerId(size_t);
+  Station GetStationById(size_t);
 
   void AddToDatabase(User &);
   void AddToDatabase(Log &);
