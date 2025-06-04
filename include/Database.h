@@ -74,7 +74,7 @@ template <typename T> class Database {
           break;
 
         if (curLinePos == std::fstream::pos_type(-1))
-          throw std::runtime_error("shit hit the fan");
+          throw std::runtime_error("invalid position");
 
         ss.clear();
         ss.str("");

@@ -6,12 +6,17 @@
 #include "Log.h"
 #include "Station.h"
 #include "User.h"
+#include <array>
+
+enum class StationsEnum { ST1, ST2, END };
+
+constexpr size_t stationsSize = static_cast<size_t>(StationsEnum::END);
 
 class State {
   Database<Bike> BikeDB;
   Database<User> UserDB;
   Database<Log> LogDB;
-  Station Stations[7];
+  std::array<Station, stationsSize> Stations;
 
 public:
   State(std::string logDBPath, std::string userDBPath, std::string bikeDBPath)

@@ -104,6 +104,8 @@ void State::RentBike(size_t bikeId, size_t userId) {
       throw std::runtime_error("Cannot rent more than one bike at a time");
     }
 
+    Stations[bike.GetCurrentStationId()].RemoveBikeId(bikeId);
+
     bike.SetIsTaken(true);
     bike.SetCurrentOwnerId(userId);
 
@@ -127,7 +129,6 @@ void State::RentBike(size_t bikeId, size_t userId) {
 
 void State::ReturnBike(size_t bikeId, size_t stationId) {
   try {
-
     Bike bike = BikeDB.GetById(bikeId);
     size_t userId = bike.GetCurrentOwnerId();
 
@@ -137,7 +138,7 @@ void State::ReturnBike(size_t bikeId, size_t stationId) {
     bike.SetCurrentOwnerId(0);
     bike.SetCurrentStationId(0);
 
-    // TODO: add station logic
+    Stations[stationId].AddBikeId(bikeId);
 
     usr.SetBikeRentedId(0);
     ReturnLog rtLog(bikeId, stationId);
