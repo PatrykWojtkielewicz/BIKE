@@ -24,7 +24,9 @@ class State {
 
 public:
   State(std::string logDBPath, std::string userDBPath, std::string bikeDBPath)
-      : LogDB(logDBPath), UserDB(userDBPath), BikeDB(bikeDBPath){};
+      : LogDB(logDBPath), UserDB(userDBPath), BikeDB(bikeDBPath) {
+    SynchronizeStations();
+  };
 
   std::string GetUserEmail(size_t);
   std::string GetUserName(size_t);
@@ -43,6 +45,9 @@ public:
 
   void RentBike(size_t, size_t);
   void ReturnBike(size_t, size_t);
+
+  void SynchronizeStations();
+  size_t CheckUserCredentials(std::string, std::string);
 };
 
 template <> User State::GetObjectById<User>(size_t);

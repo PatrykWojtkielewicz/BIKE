@@ -56,6 +56,8 @@ bool State::GetBikeIsTaken(size_t id) {
   try {
     Bike bike = BikeDB.GetById(id);
     return bike.IsTaken();
+  } catch (const Database<Bike>::NoRecordsFound &e) {
+    return false;
   } catch (const std::runtime_error &e) {
     std::cerr << "Error retrieving bike status: " << e.what() << std::endl;
     throw;
@@ -82,7 +84,10 @@ void State::AddToDatabase(User &obj) { UserDB.Create(obj); }
 
 void State::AddToDatabase(Log &obj) { LogDB.Create(obj); }
 
-void State::AddToDatabase(Bike &obj) { BikeDB.Create(obj); }
+void State::AddToDatabase(Bike &obj) {
+  BikeDB.Create(obj);
+  Stations[obj.GetCurrentStationId()].AddBikeId(obj.id);
+}
 
 template <> User State::GetObjectById<User>(size_t id) {
   return UserDB.GetById(id);
@@ -161,6 +166,36 @@ void State::ReturnBike(size_t bikeId, size_t stationId) {
     std::cerr << e.what() << std::endl;
     throw;
   }
+}
+
+void State::SynchronizeStations() {
+  for (size_t i = 1; i < Bike::idCounter; ++i) {
+    try {
+      Bike bk = GetObjectById<Bike>(i);
+      if (bk.IsTaken())
+        continue;
+      size_t stationId = bk.GetCurrentStationId();
+      Stations[stationId].AddBikeId(bk.id);
+    } catch (const Database<Bike>::NoRecordsFound &e) {
+      continue;
+    }
+  }
+}
+
+size_t State::CheckUserCredentials(std::string mail, std::string pass) {
+
+  for (size_t i = 1; i < User::idCounter; ++i) {
+    try {
+      User usr = GetObjectById<User>(i);
+      if (usr.GetEmail() == mail && usr.IsPasswordMatch(pass))
+        return usr.id;
+
+    } catch (const Database<User>::NoRecordsFound &e) {
+      continue;
+    }
+  }
+
+  throw Database<User>::NoRecordsFound("Given credentials are invalid");
 }
 
 StationsEnum &operator++(StationsEnum &st) {

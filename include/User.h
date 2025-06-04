@@ -8,11 +8,16 @@ class User : public DatabaseEntry<User> {
   std::string name;
   std::string surname;
   std::string email;
+  std::string password;
   size_t bikeRentedId;
 
 public:
-  User(std::string name = "", std::string surname = "", std::string email = "")
-      : name(name), surname(surname), email(email), bikeRentedId(0) {}
+  User(std::string name = "", std::string surname = "", std::string email = "",
+       std::string password = "")
+      : name(name), surname(surname), email(email), password(password),
+        bikeRentedId(0) {}
+
+  bool IsPasswordMatch(std::string str) { return str == password; }
 
   std::string GetName() const { return name; }
   std::string GetSurname() const { return surname; }

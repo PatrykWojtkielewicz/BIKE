@@ -3,7 +3,6 @@
 
 #include "GUINode.h"
 #include "State.h"
-#include <sstream>
 
 class GUI {
   StationsEnum currItem;
@@ -12,6 +11,9 @@ class GUI {
   void NextItem();
   void PreviousItem();
   static void RenderStation(size_t);
+  void RenderAdminPanel();
+  void SynchronizeStationNodesContent();
+  void AdminPanelAddBike();
 
 public:
   GUI() : currItem(static_cast<StationsEnum>(0)) {
@@ -19,16 +21,10 @@ public:
 
     for (size_t i = 0; i < stationsSize; ++i) {
       items[i].SetActivatedFunction(RenderStation);
-
-      std::ostringstream oss;
-      oss << "Station " << i;
-
-      items[i].SetContent(oss.str());
     }
+    SynchronizeStationNodesContent();
   }
 
   void Start();
-  static char GetKeyPress();
-  static void Clear();
 };
 #endif

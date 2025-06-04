@@ -1,6 +1,6 @@
-#include "../include/State.h"
-#include "GUI.h"
-#include "User.h"
+#include "GUIMenu.h"
+#include "State.h"
+#include <cstdio>
 #include <cstdlib>
 
 constexpr char logDBPath[] = "./data/logs.txt";
@@ -8,16 +8,19 @@ constexpr char userDBPath[] = "./data/users.txt";
 constexpr char bikeDBPath[] = "./data/bikes.txt";
 
 State state(logDBPath, userDBPath, bikeDBPath);
+
 size_t userId;
 
 int main() {
 
-  GUI gui;
+  GUIMenu guim;
 
-  User usr("Karol", "Bobryk", "mail@com");
+  guim.CreateNode<void>();
+  guim.CreateNode<void>();
+  guim.CreateNode<void>();
 
-  state.AddToDatabase(usr);
+  guim.Render();
+  guim.InputHandler();
 
-  gui.Start();
   return EXIT_SUCCESS;
 }
