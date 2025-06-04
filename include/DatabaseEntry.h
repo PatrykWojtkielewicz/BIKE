@@ -11,6 +11,8 @@ public:
 
   DatabaseEntry() : id(++idCounter) {}
 
+  ~DatabaseEntry() = default;
+
   virtual std::ostream &GetDatabaseEntryToStream(std::ostream &) = 0;
 
   virtual std::istream &ParseObjectFromStream(std::istream &) = 0;
