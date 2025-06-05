@@ -18,7 +18,7 @@ std::ostream &User::GetDatabaseEntryToStream(std::ostream &os) {
 std::istream &User::ParseObjectFromStream(std::istream &is) {
 
   std::string inputStr;
-  is >> inputStr;
+  std::getline(is, inputStr);
 
   boost::char_separator<char> sep(";");
   boost::tokenizer<boost::char_separator<char>> tokens(inputStr, sep);

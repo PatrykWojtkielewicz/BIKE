@@ -7,6 +7,8 @@
 #include "Station.h"
 #include "User.h"
 #include <array>
+#include <memory>
+#include <vector>
 
 enum class StationsEnum { ST1, ST2, COUNT };
 constexpr size_t stationsSize = static_cast<size_t>(StationsEnum::COUNT);
@@ -36,6 +38,7 @@ public:
   bool GetBikeIsTaken(size_t);
   size_t GetBikeCurrentOwnerId(size_t);
   Station GetStationById(size_t);
+  std::shared_ptr<std::vector<std::string>> GetUserLogs(size_t);
 
   void AddToDatabase(User &);
   void AddToDatabase(Log &);

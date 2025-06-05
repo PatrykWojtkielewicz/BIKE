@@ -12,6 +12,8 @@ protected:
   time_t timestamp;
 
 public:
+  std::string LogStr;
+
   Log() : Log(0, 0) {}
   Log(size_t bikeId, size_t userId)
       : bikeId(bikeId), userId(userId), timestamp(std::time(nullptr)) {}
@@ -20,11 +22,10 @@ public:
 
   virtual std::string GetLogString(); // chyba virtual ma najwiecej sensu
 
-  void SaveToFile(std::string);
-
   bool isEqual(const DatabaseEntry<Log> &) const override;
   std::ostream &GetDatabaseEntryToStream(std::ostream &) override;
   std::istream &ParseObjectFromStream(std::istream &) override;
+  size_t GetUserId() { return userId; }
 };
 
 #endif

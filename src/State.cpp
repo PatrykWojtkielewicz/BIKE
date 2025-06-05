@@ -1,6 +1,7 @@
 #include "State.h"
 #include "RentLog.h"
 #include "ReturnLog.h"
+#include <memory>
 #include <stdexcept>
 std::string State::GetUserEmail(size_t id) {
   try {
@@ -130,7 +131,7 @@ void State::RentBike(size_t bikeId, size_t userId) {
     LogDB.Create(rtLog);
 
   } catch (const Database<Bike>::NoRecordsFound &e) {
-    std::cerr << e.what() << std::endl;
+    std::cerr << e.what() << std::endl; // ERROR HERE
     throw;
   } catch (const Database<User>::NoRecordsFound &e) {
     std::cerr << e.what() << std::endl;
@@ -147,7 +148,7 @@ void State::ReturnBike(size_t bikeId, size_t stationId) {
 
     bike.SetIsTaken(false);
     bike.SetCurrentOwnerId(0);
-    bike.SetCurrentStationId(0);
+    bike.SetCurrentStationId(stationId);
 
     Stations[stationId].AddBikeId(bikeId);
 
@@ -196,6 +197,23 @@ size_t State::CheckUserCredentials(std::string mail, std::string pass) {
   }
 
   throw Database<User>::NoRecordsFound("Given credentials are invalid");
+}
+
+std::shared_ptr<std::vector<std::string>> State::GetUserLogs(size_t userId) {
+  auto logsVec = std::make_shared<std::vector<std::string>>();
+  for (size_t i = 0; i < Log::idCounter; ++i) {
+    try {
+      Log lg = GetObjectById<Log>(i);
+
+      if (lg.GetUserId() != userId)
+        continue;
+      logsVec->push_back(lg.LogStr);
+
+    } catch (const Database<Log>::NoRecordsFound &e) {
+      continue;
+    }
+  }
+  return logsVec;
 }
 
 StationsEnum &operator++(StationsEnum &st) {

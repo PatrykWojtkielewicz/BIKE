@@ -1,10 +1,15 @@
 #include "GUI.h"
 #include "Database.h"
+#include "GUIMenu.h"
 #include "GUINode.h"
+#include "State.h"
 #include <cstdlib>
 #include <functional>
+#include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 #ifdef WIN32
 #include <conio.h>
@@ -16,13 +21,15 @@
 void GUI::Start() {
   extern size_t userId;
   extern State state;
-  Clear();
+
   std::string mail, password;
-  bool isAdmin = false;
+
   std::cout << "Mail: ";
   std::cin >> mail;
   std::cout << "Password: ";
   std::cin >> password;
+
+  bool isAdmin = false;
 
   if (mail == "root" && password == "root")
     isAdmin = true;
@@ -44,233 +51,161 @@ void GUI::Start() {
       userId = newUsr.id;
     }
   }
-
-  char choice;
-
   if (!isAdmin) {
-
-    while (true) {
-      SynchronizeStationNodesContent();
-      Render();
-
-      choice = GetKeyPress();
-      switch (choice) {
-      case 'w':
-        NextItem();
-        break;
-      case 's':
-        PreviousItem();
-        break;
-      case 'd':
-        items[static_cast<int>(currItem)].Activate(static_cast<int>(currItem));
-        break;
-      default:;
-      }
-    }
-
+    StartStationsPanel();
   } else {
+    StartAdminPanel();
+  }
+}
 
-    while (true) {
+void GUI::StartAdminPanel() {
+  extern State state;
+  GUIMenu guimAdmin;
 
-      RenderAdminPanel();
+  auto node = std::unique_ptr<GUINode<void>>(new GUINode<void>());
+  node->SetContent("Add Bike");
+  node->SetActivatedFunction([]() {
+    GUIMenu::Clear();
 
-      choice = GetKeyPress();
-      switch (choice) {
-      case 'w':
-        NextItem();
-        break;
-      case 's':
-        PreviousItem();
-        break;
-      case 'd':
-        items[static_cast<int>(currItem)].Activate(static_cast<int>(currItem));
-        break;
-      default:;
-      }
+    size_t stationId;
+    std::cout << "Provide station id: ";
+    std::cin >> stationId;
+
+    if (stationId >= stationsSize) {
+      GUIMenu::Clear();
+      std::cout << "Invalid station id, press anything to continue"
+                << std::endl;
+
+      GUIMenu::GetKeyPress();
+      throw GUIMenu::RequestToContinue();
     }
-  }
+
+    Bike bk(stationId);
+    state.AddToDatabase(bk);
+  });
+
+  guimAdmin.AddNode(std::move(node));
+  guimAdmin.InputHandler();
 }
 
-void GUI::Render() {
-  Clear();
-  for (auto item : items) {
-    std::cout << "[" << (item.IsFocused() ? "\033[36m*\033[0m" : " ") << "]"
-              << item.GetContent() << "\n";
-  }
-}
-
-void GUI::PreviousItem() {
-  this->items[static_cast<int>(currItem--)].Unfocus();
-  this->items[static_cast<int>(currItem)].Focus();
-}
-
-void GUI::NextItem() {
-  this->items[static_cast<int>(currItem++)].Unfocus();
-  this->items[static_cast<int>(currItem)].Focus();
-}
-
-void GUI::RenderStation(size_t stationId) {
+void GUI::StartStationsPanel() {
   extern State state;
   extern size_t userId;
-  std::vector<GUINode<void, size_t, size_t>> nodes;
 
-  size_t curFocus = 0;
+  GUIMenu guimStations;
 
-  for (auto item : state.GetStationById(stationId).bikeIds) {
-    if (item == 0)
-      continue;
-    GUINode<void, size_t, size_t> node;
-    std::ostringstream oss;
-    oss << item;
-
-    node.SetContent(oss.str());
-
-    node.SetActivatedFunction(std::bind(&State::ReturnBike, &state,
-                                        std::placeholders::_1,
-                                        std::placeholders::_2));
-    nodes.push_back(node);
-  }
-
-  if (state.GetBikeIsTaken(
-          state.GetObjectById<User>(userId).GetBikeRentedId())) {
-    GUINode<void, size_t, size_t> retNode;
-
-    retNode.SetContent("Return Bike here");
-    retNode.SetActivatedFunction(std::bind(&State::ReturnBike, &state,
-                                           std::placeholders::_1,
-                                           std::placeholders::_2));
-
-    nodes.push_back(retNode);
-  }
-
-  if (!nodes.empty()) {
-    nodes[0].Focus();
-  }
-
-  char choice;
-
-  while (true) {
-    GUI::Clear();
-
-    for (auto item : nodes) {
-      std::cout << "[" << (item.IsFocused() ? "\033[36m*\033[0m" : " ") << "]"
-                << item.GetContent() << "\n";
-    }
-
-    choice = GUI::GetKeyPress();
-    switch (choice) {
-
-    case 'w':
-      nodes[curFocus].Unfocus();
-      curFocus = (curFocus - 1 + nodes.size()) % nodes.size();
-      nodes[curFocus].Focus();
-      break;
-
-    case 's':
-      nodes[curFocus].Unfocus();
-      curFocus = (curFocus + 1) % nodes.size();
-      nodes[curFocus].Focus();
-      break;
-
-    case 'd': {
-      try {
-        std::istringstream iss(nodes[curFocus].GetContent());
-        size_t bikeId;
-        iss >> bikeId;
-        std::cout << bikeId << ";" << userId;
-        nodes[curFocus].Activate(bikeId, userId);
-      } catch (const std::runtime_error &e) { // ERROR HERE
-        std::cout << e.what() << ", Press anything to continue" << "\n";
-        GUI::GetKeyPress();
-      }
-      return;
-      break;
-    }
-
-    case 'a':
-      return;
-
-    default:;
-      break;
-    }
-  }
-}
-
-void GUI::SynchronizeStationNodesContent() {
-  extern State state;
   for (size_t i = 0; i < stationsSize; ++i) {
 
+    auto node = std::unique_ptr<GUINode<void>>(new GUINode<void>());
+    Station curStation = state.GetStationById(i);
     std::ostringstream oss;
-    Station st = state.GetStationById(i);
-    oss << i + 1 << ". Station " << st.GetNonZeroFieldsSize() << "/"
-        << st.GetCapacity();
 
-    items[i].SetContent(oss.str());
+    oss << i + 1 << " Station " << curStation.GetNonZeroFieldsSize() << "/"
+        << curStation.GetCapacity();
+
+    node->SetContent(oss.str());
+    node->SetActivatedFunction([this, i]() { StartStationContentPanel(i); });
+
+    guimStations.AddNode(std::move(node));
+  }
+
+  auto node = std::unique_ptr<GUINode<void>>(new GUINode<void>());
+
+  size_t userIdCopy = userId;
+
+  node->SetContent("View History");
+
+  node->SetActivatedFunction(
+      [this, userIdCopy]() { StartLogsPanel(userIdCopy); });
+
+  guimStations.AddNode(std::move(node));
+
+  guimStations.InputHandler(
+      [this](std::vector<std::unique_ptr<GUINodeBase>> &nodes) {
+        SynchronizeStationNodesContent(nodes);
+      });
+}
+
+void GUI::SynchronizeStationNodesContent(
+    std::vector<std::unique_ptr<GUINodeBase>> &nodes) {
+  extern State state;
+
+  size_t i = 0;
+  for (auto &node : nodes) {
+    if (i >= stationsSize)
+      continue;
+    Station curStation = state.GetStationById(i);
+
+    std::ostringstream oss;
+    oss << i + 1 << " Station " << curStation.GetNonZeroFieldsSize() << "/"
+        << curStation.GetCapacity();
+
+    node->SetContent(oss.str());
+    ++i;
   }
 }
 
-void GUI::RenderAdminPanel() {
+void GUI::StartStationContentPanel(size_t stationId) {
   extern State state;
   extern size_t userId;
-  std::vector<GUINode<void>> nodes;
+  GUIMenu guimStation;
 
-  size_t curFocus = 0;
-
-  GUINode<void> addBikeNode;
-  addBikeNode.SetContent("Add Bike");
-
-  addBikeNode.SetActivatedFunction(std::bind(&GUI::AdminPanelAddBike, this));
-
-  nodes.push_back(addBikeNode);
-
-  char choice;
-
-  nodes[0].Focus();
-
-  while (true) {
-    GUI::Clear();
-
-    for (auto item : nodes) {
-      std::cout << "[" << (item.IsFocused() ? "\033[36m*\033[0m" : " ") << "]"
-                << item.GetContent() << "\n";
-    }
-
-    choice = GUI::GetKeyPress();
-    switch (choice) {
-
-    case 'w':
-      nodes[curFocus].Unfocus();
-      curFocus = (curFocus - 1 + nodes.size()) % nodes.size();
-      nodes[curFocus].Focus();
-      break;
-
-    case 's':
-      nodes[curFocus].Unfocus();
-      curFocus = (curFocus + 1) % nodes.size();
-      nodes[curFocus].Focus();
-      break;
-
-    case 'd': {
-      try {
-        nodes[curFocus].Activate();
-      } catch (const std::runtime_error &e) {
-        std::cout << e.what() << ", Press anything to continue" << "\n";
-        GUI::GetKeyPress();
-      }
-      break;
-    }
-
-    default:;
-      break;
-    }
+  if (!state.GetStationById(stationId).GetNonZeroFieldsSize() &&
+      !state.GetBikeIsTaken(state.GetUserBikeRented(userId))) {
+    return;
   }
+
+  for (auto i : state.GetStationById(stationId).bikeIds) {
+    if (i == 0)
+      continue;
+    auto node = std::unique_ptr<GUINode<void>>(new GUINode<void>());
+
+    std::ostringstream oss;
+    oss << "Bike " << i;
+
+    node->SetContent(oss.str());
+    size_t userIdCopy = userId;
+    node->SetActivatedFunction([i, userIdCopy]() {
+      try {
+        state.RentBike(i, userIdCopy);
+      } catch (const std::runtime_error &e) {
+        throw GUIMenu::RequestToExit(e.what());
+      }
+      throw GUIMenu::RequestToExit();
+    });
+
+    guimStation.AddNode(std::move(node));
+  }
+
+  if (state.GetBikeIsTaken(state.GetUserBikeRented(userId))) {
+    auto node = std::unique_ptr<GUINode<void>>(new GUINode<void>());
+    node->SetContent("Return bike Here");
+
+    size_t bikeId = state.GetUserBikeRented(userId);
+
+    node->SetActivatedFunction([bikeId, stationId]() {
+      state.ReturnBike(bikeId, stationId);
+      throw GUIMenu::RequestToExit();
+    });
+
+    guimStation.AddNode(std::move(node));
+  }
+
+  guimStation.InputHandler();
 }
 
-void GUI::AdminPanelAddBike() {
+void GUI::StartLogsPanel(size_t id) {
   extern State state;
-  size_t stationId;
-  std::cout << "Station id: ";
-  std::cin >> stationId;
-  Bike newBk(stationId);
-  state.AddToDatabase(newBk);
+
+  GUIMenu guimLogs;
+  std::shared_ptr<std::vector<std::string>> logs = state.GetUserLogs(id);
+
+  for (auto log : *logs) {
+    auto node = std::unique_ptr<GUINode<void>>(new GUINode<void>());
+    node->SetContent(log);
+    node->SetActivatedFunction([]() { return; });
+    guimLogs.AddNode(std::move(node));
+  }
+
+  guimLogs.InputHandler();
 }

@@ -2,6 +2,7 @@
 #define GUI_NODE_H
 #include <cstdlib>
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -24,7 +25,6 @@ public:
   GUINodeBase(bool isFocused, std::string content)
       : isFocused(isFocused), content(content) {}
 
-  bool IsFocused() { return isFocused; }
   virtual void Activate() = 0;
 
   void Focus() { isFocused = true; }
@@ -32,56 +32,32 @@ public:
 
   void SetContent(std::string str) { content = str; }
   std::string GetContent() { return content; }
+  bool IsFocused() { return isFocused; }
 };
 
-template <typename T, typename... Args> class GUINode : public GUINodeBase {
-  std::function<T(Args...)> activatedFunction;
-  std::tuple<Args...> storedArgs;
-  bool argsSet = false;
+template <typename T> class GUINode : public GUINodeBase {
+  std::function<T()> boundFunction;
 
 public:
-  GUINode(bool isFocused = false, std::string content = "Placeholder",
-          std::function<T(Args...)> fn = nullptr)
-      : GUINodeBase(isFocused, content), activatedFunction(std::move(fn)) {}
+  GUINode(bool isFocused = false, std::string content = "Placeholder")
+      : GUINodeBase(isFocused, content) {}
 
-  void SetActivatedFunction(std::function<T(Args...)> fn) {
-    activatedFunction = std::move(fn);
-  }
-
-  void SetArguments(Args... args) {
-    storedArgs = std::make_tuple(args...);
-    argsSet = true;
+  template <typename Func, typename... Args>
+  void SetActivatedFunction(Func &&func, Args &&...args) {
+    boundFunction = [=]() { return func(args...); };
   }
 
   void Activate() override {
-    this->Activate(Args()...);
-    if (activatedFunction) {
-      if (argsSet) {
-        ActivateWithStoredArgs(make_index_sequence<sizeof...(Args)>{});
-      } else {
-        ActivateWithDefaultArgs(make_index_sequence<sizeof...(Args)>{});
-      }
+    if (boundFunction) {
+      boundFunction();
     }
   }
 
-  template <typename... CallArgs>
-  auto Activate(CallArgs &&...args) ->
-      typename std::enable_if<std::is_convertible<std::tuple<CallArgs...>,
-                                                  std::tuple<Args...>>::value,
-                              T>::type {
-    if (activatedFunction) {
-      return activatedFunction(std::forward<CallArgs>(args)...);
+  template <typename... CallArgs> T Activate(CallArgs &&...args) {
+    if (boundFunction) {
+      return boundFunction(args...);
     }
     return T();
-  }
-
-private:
-  template <size_t... Is> void ActivateWithStoredArgs(index_sequence<Is...>) {
-    activatedFunction(std::get<Is>(storedArgs)...);
-  }
-
-  template <size_t... Is> void ActivateWithDefaultArgs(index_sequence<Is...>) {
-    activatedFunction(Args()...);
   }
 };
 

@@ -1,4 +1,6 @@
 #include "GUIMenu.h"
+#include "GUINode.h"
+#include <functional>
 #include <iostream>
 #include <memory>
 
@@ -56,18 +58,22 @@ void GUIMenu::Render() {
 
 void GUIMenu::NextItem() {
   nodes[currItem]->Unfocus();
-  currItem = (currItem + 1) % currItem;
+  currItem = (currItem + 1) % nodes.size();
   nodes[currItem]->Focus();
 }
 
 void GUIMenu::PreviousItem() {
   nodes[currItem]->Unfocus();
-  currItem = (currItem - 1 + currItem) % currItem;
+  currItem = (currItem - 1 + nodes.size()) % nodes.size();
   nodes[currItem]->Focus();
 }
 
-void GUIMenu::InputHandler() {
+void GUIMenu::InputHandler(
+    std::function<void(std::vector<std::unique_ptr<GUINodeBase>> &)>
+        reloadData) {
   char choice;
+  if (nodes.empty())
+    return;
 
   for (auto &i : nodes)
     i->Unfocus();
@@ -75,7 +81,9 @@ void GUIMenu::InputHandler() {
   nodes[0]->Focus();
 
   while (true) {
+    reloadData(nodes);
     Render();
+
     choice = GUIMenu::GetKeyPress();
 
     switch (choice) {
@@ -86,11 +94,25 @@ void GUIMenu::InputHandler() {
       NextItem();
       break;
     case 'd':
-      nodes[currItem]->Activate();
+      try {
+        nodes[currItem]->Activate();
+      } catch (const RequestToExit &e) {
+        return;
+      } catch (const RequestToContinue &e) {
+        continue;
+      }
+
+      break;
+
     case 'a':
       return;
     default:
       break;
     }
   }
+}
+
+void GUIMenu::InputHandler() {
+  GUIMenu::InputHandler(
+      [this](std::vector<std::unique_ptr<GUINodeBase>> &nodes) {});
 }

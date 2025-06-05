@@ -25,9 +25,23 @@ public:
   void NextItem();
   void PreviousItem();
 
+  void
+  InputHandler(std::function<void(std::vector<std::unique_ptr<GUINodeBase>> &)>
+                   reloadData);
   void InputHandler();
-
   static char GetKeyPress();
   static void Clear();
+
+  class RequestToExit : public std::runtime_error {
+  public:
+    explicit RequestToExit(const std::string &message = "")
+        : std::runtime_error(message) {}
+  };
+
+  class RequestToContinue : public std::runtime_error {
+  public:
+    explicit RequestToContinue(const std::string &message = "")
+        : std::runtime_error(message) {}
+  };
 };
 #endif
