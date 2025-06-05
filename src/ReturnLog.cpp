@@ -1,5 +1,6 @@
 #include "../include/ReturnLog.h"
 
 std::string ReturnLog::GetLogString() {
-  return Log::GetLogString() + ";type: return";
+  LogStr = "return " + Log::GetLogString();
+  return "return " + Log::GetLogString();
 }

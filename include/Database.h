@@ -177,7 +177,7 @@ public:
     Create(obj);
   }
 
-  void Create(T obj) { // create
+  void Create(T &obj) { // create
 
     try {
 

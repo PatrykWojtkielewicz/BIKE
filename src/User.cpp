@@ -9,8 +9,8 @@
 
 std::ostream &User::GetDatabaseEntryToStream(std::ostream &os) {
 
-  os << id << ";" << name << ";" << surname << ";" << email << ";"
-     << bikeRentedId;
+  os << id << ";" << name << ";" << surname << ";" << email << ";" << password
+     << ";" << bikeRentedId;
 
   return os;
 }
@@ -18,7 +18,7 @@ std::ostream &User::GetDatabaseEntryToStream(std::ostream &os) {
 std::istream &User::ParseObjectFromStream(std::istream &is) {
 
   std::string inputStr;
-  is >> inputStr;
+  std::getline(is, inputStr);
 
   boost::char_separator<char> sep(";");
   boost::tokenizer<boost::char_separator<char>> tokens(inputStr, sep);
@@ -34,7 +34,8 @@ std::istream &User::ParseObjectFromStream(std::istream &is) {
   name = vec[1];
   surname = vec[2];
   email = vec[3];
-  bikeRentedId = util::stringTosize_t(vec[4]);
+  password = vec[4];
+  bikeRentedId = util::stringTosize_t(vec[5]);
 
   return is;
 }
@@ -48,5 +49,6 @@ bool User::isEqual(const DatabaseEntry<User> &other) const {
 
   return id == otherUser->id && name == otherUser->name &&
          surname == otherUser->surname && email == otherUser->email &&
+         password == otherUser->password &&
          bikeRentedId == otherUser->bikeRentedId;
 }

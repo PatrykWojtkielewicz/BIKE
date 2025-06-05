@@ -3,11 +3,11 @@
 
 #include "Log.h"
 
-class ReturnLog : public Log{
+class ReturnLog : public Log {
 public:
   ReturnLog(size_t bikeId, size_t userId) : Log(bikeId, userId) {}
-  
-  std::string GetLogString();
+
+  std::string GetLogString() override;
 };
 
 #endif

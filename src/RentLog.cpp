@@ -1,5 +1,6 @@
 #include "../include/RentLog.h"
 
 std::string RentLog::GetLogString() {
-  return Log::GetLogString() + ";type: rent";
+  LogStr = "rent " + Log::GetLogString();
+  return "rent " + Log::GetLogString();
 }

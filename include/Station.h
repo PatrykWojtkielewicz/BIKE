@@ -1,20 +1,26 @@
 #ifndef STATION_H
 #define STATION_H
 
-#include <ctime>
+#include <cstdlib>
 #include <vector>
 
 class Station {
   size_t capacity;
   size_t fill;
-  std::vector<size_t> bikeIds; // te 3 pola mozna by dac public albo napisac
-                               // gettery - do uzgodnienia
+
 public:
-  Station(size_t capacity) : capacity(capacity), fill(0), bikeIds(capacity) {}
+  std::vector<size_t> bikeIds;
+
+  Station(size_t capacity)
+      : capacity(capacity), fill(0), bikeIds(capacity, 0) {}
   Station() : Station(10) {}
 
   void AddBikeId(size_t bikeId);
   void RemoveBikeId(size_t bikeId);
+  size_t GetNonZeroFieldsSize() const { return fill; }
+  size_t GetCapacity() const { return capacity; }
+  bool IsFull() const { return fill == capacity; }
+  bool IsEmpty() const { return fill == 0; }
 };
 
 #endif

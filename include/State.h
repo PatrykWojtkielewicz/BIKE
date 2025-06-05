@@ -7,10 +7,16 @@
 #include "Station.h"
 #include "User.h"
 #include <array>
+#include <memory>
+#include <vector>
 
-enum class StationsEnum { ST1, ST2, END };
+enum class StationsEnum { ST1, ST2, COUNT };
+constexpr size_t stationsSize = static_cast<size_t>(StationsEnum::COUNT);
 
-constexpr size_t stationsSize = static_cast<size_t>(StationsEnum::END);
+StationsEnum &operator++(StationsEnum &st);
+StationsEnum &operator--(StationsEnum &st);
+StationsEnum operator++(StationsEnum &st, int);
+StationsEnum operator--(StationsEnum &st, int);
 
 class State {
   Database<Bike> BikeDB;
@@ -20,7 +26,9 @@ class State {
 
 public:
   State(std::string logDBPath, std::string userDBPath, std::string bikeDBPath)
-      : LogDB(logDBPath), UserDB(userDBPath), BikeDB(bikeDBPath){};
+      : LogDB(logDBPath), UserDB(userDBPath), BikeDB(bikeDBPath) {
+    SynchronizeStations();
+  };
 
   std::string GetUserEmail(size_t);
   std::string GetUserName(size_t);
@@ -29,6 +37,8 @@ public:
   size_t GetBikeCurrentStationId(size_t);
   bool GetBikeIsTaken(size_t);
   size_t GetBikeCurrentOwnerId(size_t);
+  Station GetStationById(size_t);
+  std::shared_ptr<std::vector<std::string>> GetUserLogs(size_t);
 
   void AddToDatabase(User &);
   void AddToDatabase(Log &);
@@ -38,6 +48,9 @@ public:
 
   void RentBike(size_t, size_t);
   void ReturnBike(size_t, size_t);
+
+  void SynchronizeStations();
+  size_t CheckUserCredentials(std::string, std::string);
 };
 
 template <> User State::GetObjectById<User>(size_t);
