@@ -26,6 +26,7 @@ public:
   std::ostream &GetDatabaseEntryToStream(std::ostream &) override;
   std::istream &ParseObjectFromStream(std::istream &) override;
   size_t GetUserId() { return userId; }
+  time_t GetTimestamp() { return timestamp; }
 };
 
 #endif

@@ -32,6 +32,8 @@ public:
   static char GetKeyPress();
   static void Clear();
 
+  void PrintLowerBar();
+
   class RequestToExit : public std::runtime_error {
   public:
     explicit RequestToExit(const std::string &message = "")

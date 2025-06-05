@@ -1,9 +1,12 @@
 #include "GUIMenu.h"
 #include "GUINode.h"
+#include "State.h"
+#include <ctime>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <memory>
-
+#include <ostream>
 #ifdef WIN32
 #include <conio.h>
 #else
@@ -53,6 +56,31 @@ void GUIMenu::Render() {
   for (auto &item : nodes) {
     std::cout << "[" << (item->IsFocused() ? "\033[36m*\033[0m" : " ") << "]"
               << item->GetContent() << "\n";
+  }
+  PrintLowerBar();
+}
+
+void GUIMenu::PrintLowerBar() {
+
+  std::cout << "w/s - move up/down" << "\n";
+  std::cout << "a - go back/exit" << "\n";
+  std::cout << "d - press button" << "\n";
+
+  extern State state;
+  extern size_t userId;
+
+  if (state.GetBikeIsTaken(state.GetUserBikeRented(userId))) {
+    std::cout << "\n\n";
+    state.GetUserBikeRented(userId);
+    time_t timeDiff = std::time(nullptr) - state.GetNewestUserActivity(userId);
+
+    int hours = timeDiff / 3600;
+    int minutes = (timeDiff % 3600) / 60;
+    int seconds = timeDiff % 60;
+
+    std::cout << "Bike rented for: " << std::setfill('0') << std::setw(2)
+              << hours << ":" << std::setw(2) << minutes << ":" << std::setw(2)
+              << seconds << std::endl;
   }
 }
 

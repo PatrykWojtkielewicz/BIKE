@@ -1,6 +1,9 @@
 #include "State.h"
 #include "RentLog.h"
 #include "ReturnLog.h"
+#include <algorithm>
+#include <ctime>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 std::string State::GetUserEmail(size_t id) {
@@ -214,6 +217,24 @@ std::shared_ptr<std::vector<std::string>> State::GetUserLogs(size_t userId) {
     }
   }
   return logsVec;
+}
+
+time_t State::GetNewestUserActivity(size_t userId) {
+  time_t maxTimestamp = std::numeric_limits<time_t>::min();
+  for (size_t i = 0; i < Log::idCounter; ++i) {
+    try {
+      Log lg = GetObjectById<Log>(i);
+      time_t ts = lg.GetTimestamp();
+
+      if (lg.GetUserId() != userId)
+        continue;
+
+      maxTimestamp = std::max(maxTimestamp, ts);
+    } catch (const Database<Log>::NoRecordsFound &e) {
+      continue;
+    }
+  }
+  return maxTimestamp;
 }
 
 StationsEnum &operator++(StationsEnum &st) {

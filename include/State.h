@@ -39,6 +39,7 @@ public:
   size_t GetBikeCurrentOwnerId(size_t);
   Station GetStationById(size_t);
   std::shared_ptr<std::vector<std::string>> GetUserLogs(size_t);
+  time_t GetNewestUserActivity(size_t);
 
   void AddToDatabase(User &);
   void AddToDatabase(Log &);
